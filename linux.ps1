@@ -134,7 +134,7 @@ function touch($file) {
   } else {
     New-Item $file -type file
   }
-
+}
 
 function which($cmd) { (Get-Command $cmd).Definition }
 
