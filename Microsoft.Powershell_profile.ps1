@@ -21,7 +21,8 @@
 .LINK
     taken from  : https://github.com/mikemaccana/powershell-profile notes here 
 #>
-
+#global
+$profileDir = $PSScriptRoot;
 # Basic Configuration:
 #Set-PSDebug -Strict # This lets user not be able to use variables without declaring them
 Set-PSReadlineOption -BellStyle None # Turn off annoying backspace noise
