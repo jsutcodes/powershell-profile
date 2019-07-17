@@ -6,20 +6,20 @@
 .NOTES
      Jordan     : Jordan Sutton <jsutcodes@gmail.com>
      Version    : 1.0
-     
+
     This file should be stored in $PROFILE.CurrentUserAllHosts
     If $PROFILE.CurrentUserAllHosts doesn't exist, you can make one with the following:
         PS> New-Item $PROFILE.CurrentUserAllHosts -ItemType File -Force
-    This will create the file and the containing subdirectory if it doesn't already 
+    This will create the file and the containing subdirectory if it doesn't already
 
-    As a reminder, to enable unsigned script execution of local scripts on client Windows, 
+    As a reminder, to enable unsigned script execution of local scripts on client Windows,
     you need to run this line (or similar) from an elevated PowerShell prompt:
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
-    This is the default policy on Windows Server 2012 R2 and above for server Windows. For 
+    This is the default policy on Windows Server 2012 R2 and above for server Windows. For
     more information about execution policies, run Get-Help about_Execution_Policies.
     Find out if the current user identity is elevated (has admin rights)
 .LINK
-    taken from  : https://github.com/mikemaccana/powershell-profile notes here 
+    taken from  : https://github.com/mikemaccana/powershell-profile notes here
 #>
 
 function head {
@@ -31,8 +31,8 @@ function head {
 # want to make this method registry friendly
 function ls-color
 {
-    param ($dir = ".", $all = $false) 
-      # Add extensions here so only have to edit colors one place 
+    param ($dir = ".", $all = $false)
+      # Add extensions here so only have to edit colors one place
     function get-extension($extension) {
       if ($extension -eq ".Exe" -Or $extension -eq ".ps1" ) {return ".Exe"}
       elseif ( $Extension -eq ".Msi" -Or $Extension -eq ".lib" -Or $extension -eq ".dll" ) {return ".cmd"}
@@ -46,35 +46,35 @@ function ls-color
     }
 
 
-    $origFg = $host.ui.rawui.foregroundColor 
+    $origFg = $host.ui.rawui.foregroundColor
     $origBg = $host.ui.rawui.backgroundColor
-    # Color LS: 
+    # Color LS:
     $exec = "Yellow"
     $hidden = "Darkgray"
     $dirColor = "DarkCyan"
     $device = "blue"
     $softlink = "Cyan"
-    $image = "green" # normally magenta but turned it to green since magenta is my background terminal color 
+    $image = "green" # normally magenta but turned it to green since magenta is my background terminal color
     $compressed = "Red"
     $cmd = "Red"
 
     if ( $all ) { $toList = Get-ChildItem -force $dir}
     else { $toList = Get-ChildItem $dir -ErrorAction "ignore"}
 
-    foreach ($Item in $toList)  
+    foreach ($Item in $toList)
     {   if($item.Extension -eq $null) # This is used for registry browsing
         {
           $item
           continue
         }
-        Switch (get-extension $Item.Extension )  
-        { 
-            ".Exe" {$host.ui.rawui.foregroundColor = $exec} 
-            ".cmd" {$host.ui.rawui.foregroundColor = $cmd} 
-            ".png" {$host.ui.rawui.foregroundColor = $image} 
-            ".zip" {$host.ui.rawui.foregroundColor = $compressed} 
-            ".lnk" {$host.ui.rawui.foregroundColor = $softlink} 
-            Default {$host.ui.rawui.foregroundColor = $origFg} 
+        Switch (get-extension $Item.Extension )
+        {
+            ".Exe" {$host.ui.rawui.foregroundColor = $exec}
+            ".cmd" {$host.ui.rawui.foregroundColor = $cmd}
+            ".png" {$host.ui.rawui.foregroundColor = $image}
+            ".zip" {$host.ui.rawui.foregroundColor = $compressed}
+            ".lnk" {$host.ui.rawui.foregroundColor = $softlink}
+            Default {$host.ui.rawui.foregroundColor = $origFg}
         }
         if((Get-Item $Item).Name.StartsWith('.')) {$host.ui.rawui.foregroundColor = $hidden}
         if ($item.Mode.StartsWith("d")) {$host.ui.rawui.foregroundColor = $dirColor}
@@ -84,12 +84,12 @@ function ls-color
           $host.ui.rawui.foregroundColor = "Red"
           $host.ui.rawui.backgroundColor = "Black"
         }
-        $item 
-        $host.ui.rawui.foregroundColor = $origFg 
-        $host.ui.rawui.backgroundColor = $origBg 
-    }  
-    # $host.ui.rawui.foregroundColor = $origFg 
-    # $host.ui.rawui.backgroundColor = $origBg 
+        $item
+        $host.ui.rawui.foregroundColor = $origFg
+        $host.ui.rawui.backgroundColor = $origBg
+    }
+    # $host.ui.rawui.foregroundColor = $origFg
+    # $host.ui.rawui.backgroundColor = $origBg
 
 }
 
@@ -99,7 +99,7 @@ function ln($target, $link) {
 
 function rmln ($link){
   if((get-item $link).Attributes.ToString() -match "ReparsePoint"){
-  (Get-Item $link).Delete()  
+  (Get-Item $link).Delete()
   } else {
       Write-Host "$link is not a symlink. only use this command to remove symlinks."
   }
@@ -107,7 +107,7 @@ function rmln ($link){
 # make call to rmln if deleting a link otherwise do regurlar rm
 function rm-safe($item) {
   if((get-item $item).Attributes.ToString() -match "ReparsePoint"){
-    rmln $item  
+    rmln $item
   } else {
       remove-item $item
   }
@@ -115,7 +115,7 @@ function rm-safe($item) {
 
 function tail {
   param($file)
-  Get-Content $file -Tail 10 
+  Get-Content $file -Tail 10
 
 }
 
@@ -141,6 +141,100 @@ function which($cmd) { (Get-Command $cmd).Definition }
 
 
 # grep???
+# example: cat .\LICENSE | grep -expression "GNU"
+function grep-ish {
+
+  [CmdletBinding()]
+  Param(
+    [Parameter(Mandatory=$true,ValueFromPipeline)]$pipelineInput,
+
+    [Parameter(Mandatory=$true,ValueFromPipeline = $false)]$expression
+  )
+  Process {
+  ForEach ($input in $pipelineInput) {
+    $input | where {$_ -match $expression }
+  }
+}
+
+  #Get-Content $pipelineInput | where {$_ -match $expression }
+
+}
+
+#Testing pipelineInput example
+# function Write-PipeLineInfoValue {
+# [cmdletbinding()]
+# param(
+#     [parameter(
+#         Mandatory         = $true,
+#         ValueFromPipeline = $true)]
+#     $pipelineInput
+# )
+
+#     Begin {
+
+#         Write-Host `n"The begin {} block runs once at the start, and is good for setting up variables."
+#         Write-Host "-------------------------------------------------------------------------------"
+
+#     }
+
+#     Process {
+
+#         ForEach ($input in $pipelineInput) {
+
+#             Write-Host "Process [$($input.Name)] information"
+
+#             if ($input.Path) {
+
+#                 Write-Host "Path: $($input.Path)"`n
+
+#             } else {
+
+#                 Write-Host "No path found!"`n -ForegroundColor Red
+
+#             }
+
+#         }
+
+#     }
+
+#     End {
+
+#         Write-Host "-------------------------------------------------------------------------------"
+#         Write-Host "The end {} block runs once at the end, and is good for cleanup tasks."`n
+
+#     }
+
+# }
+############################################################
+
+
+
+
+
+
+
+
+#sed ?? for substition only...
+# example: cat .\LICENSE | sed -expression "GNU" -replace "GPUUU"
+function sed-ish {
+  [CmdletBinding()]
+  Param(
+    [Parameter(Mandatory=$true,ValueFromPipeline)]$pipelineInput,
+
+    [Parameter(Mandatory=$true,ValueFromPipeline = $false)]$expression,
+    [Parameter(Mandatory=$true,ValueFromPipeline = $false)]$replace
+
+  )
+
+  Process {
+    ForEach ($input in $pipelineInput) {
+      $input | %{$_ -replace $expression, $replace }
+    }
+  }
+
+   #cat $file | %{$_ -replace $expression, $replace}
+
+}
 
 
 #################################################################################
@@ -152,7 +246,8 @@ set-alias ls ls-color
 remove-item  alias:rm
 set-alias rm rm-safe
 
-
+set-alias grep grep-ish
+set-alias sed sed-ish
 
 # set-alias new-link ln
 
