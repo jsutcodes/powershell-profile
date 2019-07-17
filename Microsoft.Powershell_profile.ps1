@@ -122,4 +122,4 @@ foreach ( $includeFile in ("default", "linux", "development") ) {
   Unblock-File $profileDir\$includeFile.ps1
 . "$profileDir\$includeFile.ps1"
 }
-write-output 'Jordan profile loaded.'
+write-output "Jordan profile loaded from: $PSScriptRoot"
