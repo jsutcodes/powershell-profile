@@ -89,6 +89,9 @@ function reboot {
 
 # https://blogs.technet.microsoft.com/heyscriptingguy/2012/12/30/powertip-change-the-powershell-console-title
 function set-title([string]$newtitle) {
+  $host.ui.RawUI.WindowTitle = $newtitle 
+}
+function add-title([string]$newtitle) {
   $host.ui.RawUI.WindowTitle = $newtitle + ' – ' + $host.ui.RawUI.WindowTitle
 }
 
