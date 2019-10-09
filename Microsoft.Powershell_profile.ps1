@@ -31,10 +31,11 @@ Set-PSReadlineOption -EditMode Emacs
 Set-PSReadlineKeyHandler -Key Tab -Function Complete
 # Change PowerShell Title to PowerShell and PowerShell Version
 $Host.UI.RawUI.WindowTitle = "PowerShell {0}" -f $PSVersionTable.PSVersion.ToString()
+$user = [Security.Principal.WindowsIdentity]::GetCurrent();
 # Change Title based on Admin
-if ($isAdmin)
+if ((New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  )
 {
-    $Host.UI.RawUI.WindowTitle += " [ADMIN]"
+    $Host.UI.RawUI.WindowTitle = "[ADMIN]"+$HOST.UI.RawUI.WindowTitle
 }
 
 
@@ -76,7 +77,12 @@ function edit-powershell-profile {
 function update-powershell-profile {
   & $profile
 }
-
+# Check ot see if administrator role
+function Test-Administrator  
+{  
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
+}
 function admin
 {
     if ($args.Count -gt 0)
